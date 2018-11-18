@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>com.lmax.disruptor.RingBuffer</OriginalElement>
+  <nodes>
+    <node x="6.0" y="247.0">com.lmax.disruptor.SingleProducerSequencerPad</node>
+    <node x="0.0" y="326.0">com.lmax.disruptor.SingleProducerSequencerFields</node>
+    <node x="197.75" y="0.0">com.lmax.disruptor.Sequenced</node>
+    <node x="255.0" y="247.0">com.lmax.disruptor.MultiProducerSequencer</node>
+    <node x="413.5083333333333" y="168.0">com.lmax.disruptor.RingBuffer</node>
+    <node x="77.25" y="79.0">com.lmax.disruptor.EventSequencer</node>
+    <node x="453.3833333333333" y="79.0">com.lmax.disruptor.RingBufferFields</node>
+    <node x="622.3833333333333" y="79.0">com.lmax.disruptor.EventSink</node>
+    <node x="459.3833333333333" y="0.0">com.lmax.disruptor.RingBufferPad</node>
+    <node x="256.5" y="79.0">com.lmax.disruptor.Sequencer</node>
+    <node x="17.5" y="405.0">com.lmax.disruptor.SingleProducerSequencer</node>
+    <node x="203.49166666666667" y="168.0">com.lmax.disruptor.AbstractSequencer</node>
+    <node x="334.3833333333333" y="0.0">com.lmax.disruptor.Cursored</node>
+    <node x="50.75" y="0.0">com.lmax.disruptor.DataProvider</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="com.lmax.disruptor.RingBuffer" target="com.lmax.disruptor.EventSink">
+      <point x="42.75" y="-14.5" />
+      <point x="513.2583333333333" y="148.0" />
+      <point x="676.8833333333333" y="148.0" />
+      <point x="0.0" y="14.5" />
+    </edge>
+    <edge source="com.lmax.disruptor.Sequencer" target="com.lmax.disruptor.Sequenced">
+      <point x="-28.25" y="-14.5" />
+      <point x="29.0" y="14.5" />
+    </edge>
+    <edge source="com.lmax.disruptor.RingBuffer" target="com.lmax.disruptor.RingBufferFields">
+      <point x="14.25" y="-14.5" />
+      <point x="484.7583333333333" y="138.0" />
+      <point x="527.8833333333333" y="138.0" />
+      <point x="0.0" y="14.5" />
+    </edge>
+    <edge source="com.lmax.disruptor.RingBufferFields" target="com.lmax.disruptor.RingBufferPad">
+      <point x="0.0" y="-14.5" />
+      <point x="0.0" y="14.5" />
+    </edge>
+    <edge source="com.lmax.disruptor.MultiProducerSequencer" target="com.lmax.disruptor.AbstractSequencer">
+      <point x="0.0" y="-14.5" />
+      <point x="354.5" y="222.0" />
+      <point x="327.9916666666667" y="222.0" />
+      <point x="41.5" y="14.5" />
+    </edge>
+    <edge source="com.lmax.disruptor.SingleProducerSequencerFields" target="com.lmax.disruptor.SingleProducerSequencerPad">
+      <point x="0.0" y="-14.5" />
+      <point x="0.0" y="14.5" />
+    </edge>
+    <edge source="com.lmax.disruptor.SingleProducerSequencerPad" target="com.lmax.disruptor.AbstractSequencer">
+      <point x="0.0" y="-14.5" />
+      <point x="120.5" y="222.0" />
+      <point x="244.99166666666667" y="222.0" />
+      <point x="-41.5" y="14.5" />
+    </edge>
+    <edge source="com.lmax.disruptor.RingBuffer" target="com.lmax.disruptor.Cursored">
+      <point x="-14.25" y="-14.5" />
+      <point x="456.2583333333333" y="128.0" />
+      <point x="413.1333333333333" y="128.0" />
+      <point x="26.25" y="14.5" />
+    </edge>
+    <edge source="com.lmax.disruptor.AbstractSequencer" target="com.lmax.disruptor.Sequencer">
+      <point x="0.0" y="-14.5" />
+      <point x="286.4916666666667" y="148.0" />
+      <point x="313.0" y="148.0" />
+      <point x="0.0" y="14.5" />
+    </edge>
+    <edge source="com.lmax.disruptor.SingleProducerSequencer" target="com.lmax.disruptor.SingleProducerSequencerFields">
+      <point x="0.0" y="-14.5" />
+      <point x="0.0" y="14.5" />
+    </edge>
+    <edge source="com.lmax.disruptor.EventSequencer" target="com.lmax.disruptor.Sequenced">
+      <point x="37.0" y="-14.5" />
+      <point x="188.25" y="54.0" />
+      <point x="226.75" y="54.0" />
+      <point x="-29.0" y="14.5" />
+    </edge>
+    <edge source="com.lmax.disruptor.Sequencer" target="com.lmax.disruptor.Cursored">
+      <point x="28.25" y="-14.5" />
+      <point x="341.25" y="54.0" />
+      <point x="360.6333333333333" y="54.0" />
+      <point x="-26.25" y="14.5" />
+    </edge>
+    <edge source="com.lmax.disruptor.EventSequencer" target="com.lmax.disruptor.DataProvider">
+      <point x="-37.0" y="-14.5" />
+      <point x="0.0" y="14.5" />
+    </edge>
+    <edge source="com.lmax.disruptor.RingBuffer" target="com.lmax.disruptor.EventSequencer">
+      <point x="-42.75" y="-14.5" />
+      <point x="427.7583333333333" y="138.0" />
+      <point x="151.25" y="138.0" />
+      <point x="0.0" y="14.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="459.5" y="230.5" />
+  <SelectedNodes />
+  <Categories />
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+
