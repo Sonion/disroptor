@@ -27,6 +27,7 @@ class LhsPadding
 
 class Value extends LhsPadding
 {
+    // value的前后各有7个long变量，用于缓存行填充，前后各7个保证了不管怎样，当64位的缓存行加载时value，不会有其他变量共享缓存行，从而解决了伪共享问题
     protected volatile long value;
 }
 
@@ -42,6 +43,7 @@ class RhsPadding extends Value
  *
  * <p>Also attempts to be more efficient with regards to false
  * sharing by adding padding around the volatile field.
+ * Sequence可以按照AtomicLong来理解，除了Sequence消除了伪共享问题，更加高效
  */
 public class Sequence extends RhsPadding
 {
@@ -96,6 +98,8 @@ public class Sequence extends RhsPadding
      * store.
      *
      * @param value The new value for the sequence.
+     * 此方法等同于AtomicLong#lazySet(long newValue)，
+     * 和直接修改volatile修饰的value相比，非阻塞，更高效，但更新的值会稍迟一点看到
      */
     public void set(final long value)
     {

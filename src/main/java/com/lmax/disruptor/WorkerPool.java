@@ -58,6 +58,7 @@ public final class WorkerPool<T>
 
         for (int i = 0; i < numWorkers; i++)
         {
+            // 为每个WorkHandler新建一个WorkProcessor
             workProcessors[i] = new WorkProcessor<>(
                 ringBuffer,
                 sequenceBarrier,

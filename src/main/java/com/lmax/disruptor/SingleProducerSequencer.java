@@ -120,26 +120,31 @@ public final class SingleProducerSequencer extends SingleProducerSequencerFields
         {
             throw new IllegalArgumentException("n must be > 0 and < bufferSize");
         }
-
+        // 获取上次申请最后的序列值
         long nextValue = this.nextValue;
-
+        // n=1,得到本次需要申请的序列值
         long nextSequence = nextValue + n;
+        // 可能发生绕环的点，本次申请值 - 环形一圈长度
         long wrapPoint = nextSequence - bufferSize;
+        // 数值最小的序列值，理解为最慢消费者
         long cachedGatingSequence = this.cachedValue;
-
+        // 序列值初始值是 -1 ，只有wrapPoint 大于 cachedGatingSequence 将发生绕环行为，生产者超一圈从后方追上消费者，生产者覆盖未消费的情况。
+        // 没有空坑位，将进入循环等待。
         if (wrapPoint > cachedGatingSequence || cachedGatingSequence > nextValue)
         {
             cursor.setVolatile(nextValue);  // StoreLoad fence
 
             long minSequence;
+            // 只有当消费者消费，向前移动后，才能跳出循环
+            // 每次重新获取消费者序列最小值进行轮询判断
             while (wrapPoint > (minSequence = Util.getMinimumSequence(gatingSequences, nextValue)))
             {
-                LockSupport.parkNanos(1L); // TODO: Use waitStrategy to spin?
+                LockSupport.parkNanos(1L);
             }
-
+            // 当消费者消费后，更新缓存的最小序号
             this.cachedValue = minSequence;
         }
-
+        // 将成功申请的序号赋值给对象实例变量
         this.nextValue = nextSequence;
 
         return nextSequence;
@@ -203,7 +208,9 @@ public final class SingleProducerSequencer extends SingleProducerSequencerFields
     @Override
     public void publish(long sequence)
     {
+        // 更新Sequencer内部游标值
         cursor.set(sequence);
+        // 当生产者发布新事件后，将通知等待的EventProcessor,可以进行消费
         waitStrategy.signalAllWhenBlocking();
     }
 

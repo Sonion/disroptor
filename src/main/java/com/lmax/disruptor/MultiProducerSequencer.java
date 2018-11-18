@@ -33,13 +33,16 @@ import com.lmax.disruptor.util.Util;
 public final class MultiProducerSequencer extends AbstractSequencer
 {
     private static final Unsafe UNSAFE = Util.getUnsafe();
+    // 获取int[]数组类的第一个元素与该类起始位置的偏移。
     private static final long BASE = UNSAFE.arrayBaseOffset(int[].class);
+    // 每个元素需要占用的位置，也有可能返回0。BASE和SCALE都是为了操作availableBuffer
     private static final long SCALE = UNSAFE.arrayIndexScale(int[].class);
 
     private final Sequence gatingSequenceCache = new Sequence(Sequencer.INITIAL_CURSOR_VALUE);
 
     // availableBuffer tracks the state of each ringbuffer slot
     // see below for more details on the approach
+        // 初始全是-1
     private final int[] availableBuffer;
     private final int indexMask;
     private final int indexShift;
@@ -121,6 +124,7 @@ public final class MultiProducerSequencer extends AbstractSequencer
 
         do
         {
+            // 当前游标值，初始化时是-1
             current = cursor.get();
             next = current + n;
 
@@ -214,7 +218,9 @@ public final class MultiProducerSequencer extends AbstractSequencer
     @Override
     public void publish(final long sequence)
     {
+        //多生产者是采用availableBuffer数组设置
         setAvailable(sequence);
+
         waitStrategy.signalAllWhenBlocking();
     }
 
@@ -249,15 +255,22 @@ public final class MultiProducerSequencer extends AbstractSequencer
      * minimum gating sequence is effectively our last available position in the
      * buffer), when we have new data and successfully claimed a slot we can simply
      * write over the top.
+     * availableBuffer设置可用标志
+     * 主要原因是避免发布者线程之间共享一个序列对象。
+     * 游标和最小门控序列的差值应该永远不大于RingBuffer的大小（防止生产者太快，覆盖未消费完的数据）
      */
+
     private void setAvailable(final long sequence)
     {
+        // calculateIndex 与&， calculateAvailabilityFlag 移位操作
         setAvailableBufferValue(calculateIndex(sequence), calculateAvailabilityFlag(sequence));
     }
 
     private void setAvailableBufferValue(int index, int flag)
     {
+        // 使用Unsafe更新属性，因为是直接操作内存，所以需要计算元素位置对应的内存位置buffer地址
         long bufferAddress = (index * SCALE) + BASE;
+        // availableBuffer是标志可用位置的int数组，初始全为-1
         UNSAFE.putOrderedInt(availableBuffer, bufferAddress, flag);
     }
 

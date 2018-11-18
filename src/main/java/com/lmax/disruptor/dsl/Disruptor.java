@@ -544,13 +544,13 @@ public class Disruptor<T>
         }
         return false;
     }
-
+    // barrierSequences是EventHandlerGroup实例的序列，就是上一个事件处理者组的序列
     EventHandlerGroup<T> createEventProcessors(
         final Sequence[] barrierSequences,
         final EventHandler<? super T>[] eventHandlers)
     {
         checkNotStarted();
-
+        // processorSequences本次事件处理器组的序列组
         final Sequence[] processorSequences = new Sequence[eventHandlers.length];
         final SequenceBarrier barrier = ringBuffer.newBarrier(barrierSequences);
 
@@ -569,21 +569,24 @@ public class Disruptor<T>
             consumerRepository.add(batchEventProcessor, eventHandler, barrier);
             processorSequences[i] = batchEventProcessor.getSequence();
         }
-
+        // 每次添加完事件处理器后，更新门控序列，用于后续调用链的添加判断。
         updateGatingSequencesForNextInChain(barrierSequences, processorSequences);
 
         return new EventHandlerGroup<>(this, consumerRepository, processorSequences);
     }
 
+    // 门控，是指后续消费链的消费，不能超过前边。
     private void updateGatingSequencesForNextInChain(final Sequence[] barrierSequences, final Sequence[] processorSequences)
     {
         if (processorSequences.length > 0)
         {
+            //GatingSequences一直保存消费链末端消费者的序列组
             ringBuffer.addGatingSequences(processorSequences);
             for (final Sequence barrierSequence : barrierSequences)
             {
                 ringBuffer.removeGatingSequence(barrierSequence);
             }
+            // 取消标记上一组消费者为消费链末端
             consumerRepository.unMarkEventProcessorsAsEndOfChain(barrierSequences);
         }
     }

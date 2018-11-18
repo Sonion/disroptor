@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * is started and just before the thread is shutdown.
  *
  * @param <T> event implementation storing the data for sharing during exchange or parallel coordination of an event.
+ * 每个EventHandler对应一个EventProcessor执行者，BatchEventProcessor每次大循环可以获取最高可用序号，并循环调用EventHandler
  */
 public final class BatchEventProcessor<T>
     implements EventProcessor
@@ -36,11 +37,27 @@ public final class BatchEventProcessor<T>
 
     private final AtomicInteger running = new AtomicInteger(IDLE);
     private ExceptionHandler<? super T> exceptionHandler = new FatalExceptionHandler();
+    /**
+     * 数据提供者，默认是RingBuffer，也可替换为自己的数据结构
+     */
     private final DataProvider<T> dataProvider;
+    /**
+     * 默认为ProcessingSequenceBarrier
+     */
     private final SequenceBarrier sequenceBarrier;
+    /**
+     * 此EventProcessor对应的用户自定义的EventHandler实现
+     */
     private final EventHandler<? super T> eventHandler;
+    /**
+     * 当前执行位置
+     */
     private final Sequence sequence = new Sequence(Sequencer.INITIAL_CURSOR_VALUE);
+
     private final TimeoutHandler timeoutHandler;
+    /**
+     * 每次循环取得一批可用事件后，在实际处理前调用
+     */
     private final BatchStartAware batchStartAware;
 
     /**
@@ -156,12 +173,16 @@ public final class BatchEventProcessor<T>
         {
             try
             {
+                // 当前能够使用的最大值
+                // 使用给定的等待策略去等待下一个序列可用
                 final long availableSequence = sequenceBarrier.waitFor(nextSequence);
                 if (batchStartAware != null)
                 {
                     batchStartAware.onBatchStart(availableSequence - nextSequence + 1);
                 }
 
+                // 批处理
+                // 消费的偏移量大于上次消费记录
                 while (nextSequence <= availableSequence)
                 {
                     event = dataProvider.get(nextSequence);
@@ -169,6 +190,7 @@ public final class BatchEventProcessor<T>
                     nextSequence++;
                 }
 
+                // eventHandler处理完毕后，更新当前序号
                 sequence.set(availableSequence);
             }
             catch (final TimeoutException e)

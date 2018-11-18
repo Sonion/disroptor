@@ -126,25 +126,30 @@ public final class WorkProcessor<T>
                 // typically, this will be true
                 // this prevents the sequence getting too far forward if an exception
                 // is thrown from the WorkHandler
+                // 表示nextSequence序号的处理情况（不区分正常或是异常处理）。只有处理过，才能申请下一个序号。
                 if (processedSequence)
                 {
                     processedSequence = false;
                     do
                     {
+                        // 同组中多个消费线程有可能会争抢一个序号，使用CAS避免使用锁。
+                        // 同一组使用一个workSequence，WorkProcessor不断申请下一个可用序号，对workSequence设置成功才会实际消费。
                         nextSequence = workSequence.get() + 1L;
                         sequence.set(nextSequence - 1L);
                     }
                     while (!workSequence.compareAndSet(nextSequence - 1L, nextSequence));
                 }
-
+                // 缓存的可用序号比要处理的序号大，才能进行处理
                 if (cachedAvailableSequence >= nextSequence)
                 {
                     event = ringBuffer.get(nextSequence);
                     workHandler.onEvent(event);
                     processedSequence = true;
                 }
+                // 更新缓存的可用序列。这个cachedAvailableSequence只用在WorkProcessor实例内，不同实例的缓存可能是不一样
                 else
                 {
+                    // 和单线程模式类似，返回的也是最大可用序号
                     cachedAvailableSequence = sequenceBarrier.waitFor(nextSequence);
                 }
             }

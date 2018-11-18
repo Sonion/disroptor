@@ -519,9 +519,14 @@ public final class RingBuffer<E> extends RingBufferFields<E> implements Cursored
      * com.lmax.disruptor.EventSink#publishEvent(com.lmax.disruptor.EventTranslatorTwoArg, A, B)
      */
     @Override
+    /**
+     * 生产者入口
+     */
     public <A, B> void publishEvent(EventTranslatorTwoArg<E, A, B> translator, A arg0, B arg1)
     {
+        //占坑
         final long sequence = sequencer.next();
+        //填坑
         translateAndPublish(translator, sequence, arg0, arg1);
     }
 
@@ -959,6 +964,7 @@ public final class RingBuffer<E> extends RingBufferFields<E> implements Cursored
     {
         try
         {
+            //
             translator.translateTo(get(sequence), sequence);
         }
         finally

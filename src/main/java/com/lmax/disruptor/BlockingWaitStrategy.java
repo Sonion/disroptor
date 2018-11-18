@@ -31,18 +31,21 @@ public final class BlockingWaitStrategy implements WaitStrategy
         throws AlertException, InterruptedException
     {
         long availableSequence;
+        // 当前游标小于给定序号，也就是无可用事件
         if (cursorSequence.get() < sequence)
         {
+            //也就是只有等待策略才会用锁，其他使用CAS，这就是前文提到的高效原因
             synchronized (mutex)
             {
+                // 当给定的序号大于生产者游标序号时，进行等待
                 while (cursorSequence.get() < sequence)
+                // 循环等待，在Sequencer中publish进行唤醒；等待消费时也会在循环中定时唤醒。
                 {
                     barrier.checkAlert();
                     mutex.wait();
                 }
             }
         }
-
         while ((availableSequence = dependentSequence.get()) < sequence)
         {
             barrier.checkAlert();
